@@ -595,6 +595,21 @@ def returnbin(n,interv):
             for i in range(len(n[z])):
                 v.append(0)
     return v
+def returnbin(n,interv):
+    v = []
+    if len(n)%interv > 0:
+        add = (int(len(n)/interv) + 1)* interv - len(n)
+        n = n.tolist()
+        for i in range(add):
+            n = n + [0]
+            
+    n = np.asarray(n).reshape(int(len(n)/interv), interv)
+    for z in range(len(n)):
+        if np.any(n[z]):
+            v.append(1)
+        else:
+            v.append(0)
+    return v
 def RasterPlot(sample, av, fs = 500,ax = None, av_color = 'gray',
                nsize = 1.5, alpha = 0.3):
     """
@@ -610,20 +625,20 @@ def RasterPlot(sample, av, fs = 500,ax = None, av_color = 'gray',
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
 
-    s = returnbin(np.sum(final_t,1),av)
+    s = returnbin(np.sum(sample,1),av)
     print(np.array(s).shape, final_t.shape)
     if s[0] == 1:
         start_av = True
     else:
         start_av = False
     #print(np.where(np.diff(s) != 0)[0].shape)
-    xtime = np.arange(0,len(final_t),1)/fs
+    xtime = np.arange(0,len(sample),1)/fs
     print(xtime.shape), print(len(s))
-    s = xtime[(np.where(np.diff(s) != 0)[0]+1)]
+    s = xtime[(np.where(np.diff(s) != 0)[0]+1)*av]
     if start_av:
         s = np.concatenate([[0], s])
     if s.size % 2 != 0:
-        s = np.concatenate([s, [s[-1] + av]])
+        s = np.concatenate([s, [xtime[-1]]])
 
     for sval in s.reshape(-1, 2):
         ax.axvspan(sval[0], sval[1], 0.01, 0.99, color = av_color, alpha = alpha, zorder = -10)
